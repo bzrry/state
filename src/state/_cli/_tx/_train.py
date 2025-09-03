@@ -30,6 +30,7 @@ def run_tx_train(cfg: DictConfig):
     from ...tx.callbacks import ModelFLOPSUtilizationCallback
     from ...tx.utils import get_checkpoint_callbacks, get_lightning_module, get_loggers
 
+    logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     torch.set_float32_matmul_precision("medium")
 
