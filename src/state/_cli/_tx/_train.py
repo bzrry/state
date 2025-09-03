@@ -24,6 +24,7 @@ def run_tx_train(cfg: DictConfig):
     from cell_load.data_modules import PerturbationDataModule
     from cell_load.utils.modules import get_datamodule
     from lightning.pytorch.loggers import WandbLogger
+    from lightning.pytorch.callbacks import Timer
     from lightning.pytorch.plugins.precision import MixedPrecision
 
     from ...tx.callbacks import BatchSpeedMonitorCallback
@@ -199,7 +200,7 @@ def run_tx_train(cfg: DictConfig):
     # Add BatchSpeedMonitorCallback to log batches per second to wandb
     batch_speed_monitor = BatchSpeedMonitorCallback()
 
-    callbacks = ckpt_callbacks + [batch_speed_monitor]
+    callbacks = ckpt_callbacks + [batch_speed_monitor, Timer()]
 
     # Add ModelFLOPSUtilizationCallback to track and log MFU
     if cfg["training"]["use_mfu"]:
