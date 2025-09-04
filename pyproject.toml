@@ -54,3 +54,6 @@ packages = ["src/state"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.uv]
+no-build-isolation-package = ["flash-attn"]
