@@ -264,7 +264,7 @@ def run_tx_train(cfg: DictConfig):
         del trainer_kwargs["max_steps"]
 
     if cfg["training"]["profile"]:
-        trainer_kwargs["profiler"] = "simple"
+        trainer_kwargs["profiler"] = "advanced"
 
     # Build trainer
     print(f"Building trainer with kwargs: {trainer_kwargs}")
