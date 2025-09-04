@@ -264,7 +264,7 @@ def run_tx_train(cfg: DictConfig):
         # delete max_steps to avoid conflicts
         del trainer_kwargs["max_steps"]
 
-    if cfg["training"]["profile"]:
+    if cfg["training"].get("profile"):
         trainer_kwargs["profiler"] = PyTorchProfiler(
             filename=join(run_output_dir, "profiler_output"),
             export_to_chrome=True,  # creates trace.json for speedscope
