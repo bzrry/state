@@ -269,8 +269,8 @@ def run_tx_train(cfg: DictConfig):
             dirpath=run_output_dir,
             filename="profiler_output",
             export_to_chrome=True,  # creates trace.json for speedscope
-            with_stack=True,
-            profile_memory=True,
+            with_stack=False,
+            profile_memory=False,
         )
 
     # Build trainer
