@@ -25,6 +25,7 @@ def run_tx_train(cfg: DictConfig):
     from cell_load.utils.modules import get_datamodule
     from lightning.pytorch.loggers import WandbLogger
     from lightning.pytorch.plugins.precision import MixedPrecision
+    from lightning.pytorch.profilers import PyTorchProfiler
 
     from ...tx.callbacks import BatchSpeedMonitorCallback
     from ...tx.callbacks import ModelFLOPSUtilizationCallback
@@ -264,7 +265,12 @@ def run_tx_train(cfg: DictConfig):
         del trainer_kwargs["max_steps"]
 
     if cfg["training"]["profile"]:
-        trainer_kwargs["profiler"] = "advanced"
+        trainer_kwargs["profiler"] = PyTorchProfiler(
+            filename=join(run_output_dir, "profiler_output"),
+            export_to_chrome=True,  # creates trace.json for speedscope
+            with_stack=True,
+            profile_memory=True,
+        )
 
     # Build trainer
     print(f"Building trainer with kwargs: {trainer_kwargs}")
