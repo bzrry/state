@@ -120,7 +120,7 @@ def run_tx_train(cfg: DictConfig):
     data_module.setup(stage="fit")
     dl = data_module.train_dataloader()
     print("num_workers:", dl.num_workers)
-    print("batch size:", dl.batch_size)
+    print("batch size:", dl.batch_size or data_module.batch_size)
 
     var_dims = data_module.get_var_dims()  # {"gene_dim": …, "hvg_dim": …}
     if cfg["data"]["kwargs"]["output_space"] == "gene":
