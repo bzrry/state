@@ -288,6 +288,7 @@ class StateTransitionPerturbationModel(PerturbationModel):
             self.transformer_backbone_key,
             self.transformer_backbone_kwargs,
         )
+        logger.info(f"****** attn impl: {self.transformer_backbone.config._attn_implementation}")
 
         # Project from input_dim to hidden_dim for transformer input
         # self.project_to_hidden = nn.Linear(self.input_dim, self.hidden_dim)
