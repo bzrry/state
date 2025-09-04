@@ -268,9 +268,9 @@ def run_tx_train(cfg: DictConfig):
 
     # Build trainer
     print(f"Building trainer with kwargs: {trainer_kwargs}")
-    print("****** pin_memory:", trainer_kwargs["pin_memory"])
-    print("****** persistent_workers:", trainer_kwargs["persistent_workers"])
-    print("****** prefetch_factor:", trainer_kwargs["prefetch_factor"])
+    print("****** pin_memory:", trainer_kwargs.get("pin_memory"))
+    print("****** persistent_workers:", trainer_kwargs.get("persistent_workers"))
+    print("****** prefetch_factor:", trainer_kwargs.get("prefetch_factor"))
     trainer = pl.Trainer(**trainer_kwargs)
     print("Trainer built successfully")
 
