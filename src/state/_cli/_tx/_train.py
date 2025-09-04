@@ -271,6 +271,12 @@ def run_tx_train(cfg: DictConfig):
             export_to_chrome=True,  # creates trace.json for speedscope
             with_stack=False,
             profile_memory=False,
+            schedule=torch.profiler.schedule(
+                wait=20,  # skip 20 batches
+                warmup=2,
+                active=3,  # only profile 3 batches
+                repeat=1,  # then stop
+            )
         )
 
     # Build trainer
