@@ -38,7 +38,7 @@ def build_mlp(
         # Final layer
         layers.append(nn.Linear(hidden_dim, out_dim))
 
-    return nn.Sequential(*layers)
+    return nn.Sequential(*layers).to(dtype=torch.bfloat16)
 
 
 def get_activation_class(name: str) -> nn.Module:
