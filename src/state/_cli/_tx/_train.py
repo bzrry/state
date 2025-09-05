@@ -195,8 +195,7 @@ def run_tx_train(cfg: DictConfig):
     ckpt_callbacks = get_checkpoint_callbacks(
         cfg["output_dir"],
         cfg["name"],
-        cfg["training"]["val_freq"],
-        cfg["training"].get("ckpt_every_n_steps", 4000),
+        cfg["training"].get("ckpt_every_n_epochs", 3),
     )
     # Add BatchSpeedMonitorCallback to log batches per second to wandb
     batch_speed_monitor = BatchSpeedMonitorCallback()
@@ -240,8 +239,7 @@ def run_tx_train(cfg: DictConfig):
     trainer_kwargs = dict(
         accelerator=accelerator,
         devices=1,
-        max_steps=cfg["training"]["max_steps"],  # for normal models
-        val_check_interval=cfg["training"]["val_freq"],
+        max_epochs=cfg["training"].get("max_epochs", 500),  # for normal models
         logger=loggers,
         plugins=plugins,
         callbacks=callbacks,
