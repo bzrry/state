@@ -240,7 +240,7 @@ def run_tx_train(cfg: DictConfig):
         accelerator=accelerator,
         devices=1,
         max_epochs=cfg["training"].get("max_epochs", 500),  # for normal models
-        check_val_every_n_epochs=8,
+        check_val_every_n_epoch=8,
         logger=loggers,
         plugins=plugins,
         callbacks=callbacks,
