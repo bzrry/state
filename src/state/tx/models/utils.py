@@ -104,7 +104,7 @@ def get_transformer_backbone(key, kwargs) -> PreTrainedModel:
         model_dim = config.n_embd
     elif key == "llama":
         config = LlamaConfig(**kwargs)
-        model = LlamaBidirectionalModel(config)
+        model = LlamaBidirectionalModel(config).to(torch.bfloat16)
         model_dim = config.hidden_size
 
         model.embed_tokens.weight.requires_grad = False
