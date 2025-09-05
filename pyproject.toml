@@ -12,8 +12,6 @@ authors = [
 ]
 requires-python = ">=3.10,<3.13"
 dependencies = [
-    "setuptools",
-    "wheel",
     "anndata>=0.11.4",
     "cell-load @ git+https://github.com/bzrry/cell-load.git@tjb3",
     "numpy>=2.2.6",
@@ -29,7 +27,6 @@ dependencies = [
     "geomloss>=0.2.6",
     "transformers>=4.52.3",
     "cell-eval>=0.5.22",
-    "flash-attn>=2.5.0,<3.0.0",
 ]
 
 [project.optional-dependencies]
