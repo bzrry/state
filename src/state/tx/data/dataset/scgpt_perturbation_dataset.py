@@ -234,25 +234,55 @@ class scGPTPerturbationDataset(PerturbationDataset):
         Custom collate that reshapes data into sequences.
         Safely handles normalization when vectors sum to zero.
         """
-        # First do normal collation
+        batch_size = len(batch)
+        first = batch[0]
+
+        pert_cell_emb = torch.empty(batch_size, *first["pert_cell_emb"].shape)
+        ctrl_cell_emb = torch.empty(batch_size, *first["ctrl_cell_emb"].shape)
+        pert_emb = torch.empty(batch_size, *first["pert_emb"].shape)
+        cell_type_onehot = torch.empty(batch_size, *first["cell_type_onehot"].shape)
+        batch_tensor = torch.empty(batch_size, *first["batch"].shape)
+        gene_ids = torch.empty(batch_size, *first["gene_ids"].shape)
+
+        pert_name = []
+        cell_type = []
+        batch_name = []
+
+        for i, item in enumerate(batch):
+            pert_cell_emb[i] = item["pert_cell_emb"]
+            ctrl_cell_emb[i] = item["ctrl_cell_emb"]
+            pert_emb[i] = item["pert_emb"]
+            cell_type_onehot[i] = item["cell_type_onehot"]
+            batch_tensor[i] = item["batch"]
+            gene_ids[i] = item["gene_ids"]
+
+            pert_name.append(item["pert_name"])
+            cell_type.append(item["cell_type"])
+            batch_name.append(item["batch_name"])
+
         batch_dict = {
-            "pert_cell_emb": torch.stack([item["pert_cell_emb"] for item in batch]),
-            "ctrl_cell_emb": torch.stack([item["ctrl_cell_emb"] for item in batch]),
-            "pert_emb": torch.stack([item["pert_emb"] for item in batch]),
-            "pert_name": [item["pert_name"] for item in batch],
-            "cell_type": [item["cell_type"] for item in batch],
-            "cell_type_onehot": torch.stack([item["cell_type_onehot"] for item in batch]),
-            "batch": torch.stack([item["batch"] for item in batch]),
-            "batch_name": [item["batch_name"] for item in batch],
-            "gene_ids": torch.stack([item["gene_ids"] for item in batch]),
+            "pert_cell_emb": pert_cell_emb,
+            "ctrl_cell_emb": ctrl_cell_emb,
+            "pert_emb": pert_emb,
+            "pert_name": pert_name,
+            "cell_type": cell_type,
+            "cell_type_onehot": cell_type_onehot,
+            "batch": batch_tensor,
+            "batch_name": batch_name,
+            "gene_ids": gene_ids,
         }
 
-        if "pert_flags" in batch[0]:  # only add pert_flags in case of genetic perturbations
-            batch_dict["pert_flags"] = torch.stack([item["pert_flags"] for item in batch])
+        if "pert_flags" in first:  # only add pert_flags in case of genetic perturbations
+            pert_flags = torch.empty(batch_size, *first["pert_flags"].shape)
+            for i, item in enumerate(batch):
+                pert_flags[i] = item["pert_flags"]
 
         # If the first sample has "pert_cell_counts", assume the entire batch does
-        if "pert_cell_counts" in batch[0]:
-            X_hvg = torch.stack([item["pert_cell_counts"] for item in batch])
+        if "pert_cell_counts" in first:
+            pert_cell_counts = torch.empty(batch_size, *first["pert_cell_counts"].shape)
+            for i, item in enumerate(batch):
+                pert_cell_counts[i] = item["pert_cell_counts"]
+            X_hvg = pert_cell_counts
 
             # Handle Tahoe dataset (needs log transform)
             if pert_col == "drug" or pert_col == "drugname_drugconc":
@@ -271,8 +301,11 @@ class scGPTPerturbationDataset(PerturbationDataset):
                     batch_dict["pert_cell_counts"] = torch.expm1(X_hvg).round().to(torch.int32)
 
         # If the first sample has "ctrl_cell_counts", assume the entire batch does
-        if "ctrl_cell_counts" in batch[0]:  # either control hvg gene space or 19k gene space
-            basal_hvg = torch.stack([item["ctrl_cell_counts"] for item in batch])
+        if "ctrl_cell_counts" in first:  # either control hvg gene space or 19k gene space
+            ctrl_cell_counts = torch.empty(batch_size, *first["ctrl_cell_counts"].shape)
+            for i, item in enumerate(batch):
+                ctrl_cell_counts[i] = item["ctrl_cell_counts"]
+            basal_hvg = ctrl_cell_counts
 
             # Handle Tahoe dataset (needs log transform)
             if pert_col == "drug" or pert_col == "drugname_drugconc":
