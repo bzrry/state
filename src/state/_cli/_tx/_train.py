@@ -241,7 +241,6 @@ def run_tx_train(cfg: DictConfig):
         accelerator=accelerator,
         devices=1,
         max_steps=cfg["training"]["max_steps"],  # for normal models
-        check_val_every_n_epoch=2,
         val_check_interval=cfg["training"]["val_freq"],
         logger=loggers,
         plugins=plugins,
