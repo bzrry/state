@@ -38,7 +38,7 @@ def build_mlp(
         # Final layer
         layers.append(nn.Linear(hidden_dim, out_dim))
 
-    return nn.Sequential(*layers).to(dtype=torch.bfloat16)
+    return nn.Sequential(*layers)
 
 
 def get_activation_class(name: str) -> nn.Module:
@@ -104,7 +104,7 @@ def get_transformer_backbone(key, kwargs) -> PreTrainedModel:
         model_dim = config.n_embd
     elif key == "llama":
         config = LlamaConfig(**kwargs)
-        model = LlamaBidirectionalModel(config).to(dtype=torch.bfloat16)
+        model = LlamaBidirectionalModel(config)
         model_dim = config.hidden_size
 
         model.embed_tokens.weight.requires_grad = False
