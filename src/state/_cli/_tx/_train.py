@@ -239,7 +239,7 @@ def run_tx_train(cfg: DictConfig):
     trainer_kwargs = dict(
         accelerator=accelerator,
         devices=1,
-        max_epochs=cfg["training"].get("max_epochs", 500),  # for normal models
+        max_epochs=cfg["training"].get("max_epochs", 1500),
         check_val_every_n_epoch=8,
         logger=loggers,
         plugins=plugins,
