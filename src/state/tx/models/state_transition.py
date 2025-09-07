@@ -159,7 +159,8 @@ class StateTransitionPerturbationModel(PerturbationModel):
         self.transformer_backbone_key = transformer_backbone_key
         self.transformer_backbone_kwargs = transformer_backbone_kwargs
         self.transformer_backbone_kwargs["n_positions"] = self.cell_sentence_len + kwargs.get("extra_tokens", 0)
-        self.transformer_backbone_kwargs["attn_implementation"] = "flash_attention_2"
+        if kwargs.get("flash_attn", True):
+            self.transformer_backbone_kwargs["attn_implementation"] = "flash_attention_2"
         self.transformer_backbone_kwargs["torch_dtype"] = torch.bfloat16
 
         self.distributional_loss = distributional_loss
