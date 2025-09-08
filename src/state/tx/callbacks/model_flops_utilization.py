@@ -113,7 +113,9 @@ class ModelFLOPSUtilizationCallback(Callback):
         def forward_fn():
             return self._trainstep_forward_backward(model, batch)
 
-        with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+        device = next(model.parameters()).device
+        device_type = "cuda" if device.type == "cuda" else "cpu"
+        with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
             self._flops_per_batch = int(measure_flops(model, forward_fn=forward_fn))
         print(f"ModelFLOPSUtilizationCallback: Measured FLOPs per batch: {self._flops_per_batch}")
         pl_module.log("flops_per_batch", self._flops_per_batch, prog_bar=False, on_step=True, on_epoch=False)
