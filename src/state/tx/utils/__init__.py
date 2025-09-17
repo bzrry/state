@@ -144,7 +144,7 @@ def get_checkpoint_callbacks(output_dir: str, name: str, val_freq: int, ckpt_eve
         monitor="val_loss",
         mode="min",
         save_top_k=1,  # Only keep the best checkpoint
-        every_n_train_steps=val_freq,
+        every_n_epochs=10,
     )
     callbacks.append(best_ckpt)
 
@@ -156,7 +156,7 @@ def get_checkpoint_callbacks(output_dir: str, name: str, val_freq: int, ckpt_eve
         every_n_train_steps=ckpt_every_n_steps,
         save_top_k=-1,  # Keep all periodic checkpoints
     )
-    callbacks.append(periodic_ckpt)
+    #callbacks.append(periodic_ckpt)
 
     return callbacks
 
