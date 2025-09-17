@@ -35,6 +35,7 @@ def run_tx_train(cfg: DictConfig):
     )
     from ...tx.utils import get_checkpoint_callbacks, get_lightning_module, get_loggers
 
+    logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     torch.set_float32_matmul_precision("medium")
 
@@ -123,7 +124,7 @@ def run_tx_train(cfg: DictConfig):
     data_module.setup(stage="fit")
     dl = data_module.train_dataloader()
     print("num_workers:", dl.num_workers)
-    print("batch size:", dl.batch_size)
+    print("batch size:", dl.batch_size or data_module.batch_size)
 
     var_dims = data_module.get_var_dims()  # {"gene_dim": …, "hvg_dim": …}
     if cfg["data"]["kwargs"]["output_space"] == "gene":
@@ -252,8 +253,6 @@ def run_tx_train(cfg: DictConfig):
     trainer_kwargs = dict(
         accelerator=accelerator,
         devices=1,
-        max_steps=cfg["training"]["max_steps"],  # for normal models
-        check_val_every_n_epoch=None,
         logger=loggers,
         plugins=plugins,
         callbacks=callbacks,
