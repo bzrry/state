@@ -34,6 +34,9 @@ vectordb = [
     "lancedb>=0.24.0"
 ]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [dependency-groups]
 dev = ["ruff>=0.11.11", "vulture>=2.14", "ipython>=8.37.0"]
 
