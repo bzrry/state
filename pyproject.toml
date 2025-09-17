@@ -13,7 +13,7 @@ authors = [
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "anndata>=0.11.4",
-    "cell-load>=0.7.12",
+    "cell-load @ git+https://github.com/arcinstitute/cell-load.git@3fb8c440943f5fd802d3a5c62815f8270effa751",
     "numpy>=2.2.6",
     "pandas>=2.2.3",
     "pyyaml>=6.0.2",
@@ -35,6 +35,9 @@ dependencies = [
 vectordb = [
     "lancedb>=0.24.0"
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [dependency-groups]
 dev = ["ruff>=0.11.11", "vulture>=2.14", "ipython>=8.37.0"]
