@@ -88,7 +88,7 @@ class CumulativeFLOPSCallback(Callback):
             on_epoch=False,
             sync_dist=True,
         )
-        logger.info(f"CumulativeFLOPSCallback: Logged cumulative FLOPs: {self._cumulative_flops}")
+        logger.debug(f"CumulativeFLOPSCallback: Logged cumulative FLOPs: {self._cumulative_flops}")
 
     def on_validation_start(self, trainer: Trainer, pl_module: Any) -> None:
         if self._flops_per_batch is None:
