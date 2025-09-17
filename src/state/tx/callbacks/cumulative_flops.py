@@ -59,7 +59,10 @@ class CumulativeFLOPSCallback(Callback):
         def forward_fn():
             return self._trainstep_forward_backward(model, batch)
 
-        self._flops_per_batch = int(measure_flops(model, forward_fn=forward_fn))
+        device = next(model.parameters()).device
+        device_type = "cuda" if device.type == "cuda" else "cpu"
+        with torch.autocast(device_type=device_type, dtype=torch.bfloat16):
+            self._flops_per_batch = int(measure_flops(model, forward_fn=forward_fn))
         logger.info(f"CumulativeFLOPSCallback: Measured FLOPs per batch: {self._flops_per_batch}")
 
         model.zero_grad(set_to_none=True)

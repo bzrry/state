@@ -130,7 +130,7 @@ class ModelFLOPSUtilizationCallback(Callback):
     def on_train_batch_start(self, trainer: Trainer, pl_module: Any, batch: dict, batch_idx: int) -> None:
         # Only calculate FLOPs on the first batch of the first epoch
         if not self._measured and batch_idx == 0 and trainer.current_epoch == 0:
-            #self._measure_flops_once(trainer, pl_module, batch)
+            self._measure_flops_once(trainer, pl_module, batch)
             if torch.cuda.is_available():
                 torch.cuda.synchronize()
             self._train_start_time = time.time()
