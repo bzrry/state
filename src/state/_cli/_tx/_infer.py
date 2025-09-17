@@ -162,7 +162,7 @@ def run_tx_infer(args: argparse.Namespace):
         Construct a model batch with variable-length sentence (B=1, S=T, ...).
         IMPORTANT: All tokens in this batch share the same perturbation.
         """
-        X_batch = torch.tensor(ctrl_basal_np, dtype=torch.float32, device=device)  # [T, E_in]
+        X_batch = torch.tensor(ctrl_basal_np, dtype=torch.bfloat16, device=device)  # [T, E_in]
         batch = {
             "ctrl_cell_emb": X_batch,
             "pert_emb": pert_onehots.to(device),  # [T, pert_dim] (same row repeated)
@@ -378,7 +378,7 @@ def run_tx_infer(args: argparse.Namespace):
         if not args.quiet:
             print(f"No --checkpoint given, using {checkpoint_path}")
 
-    model = StateTransitionPerturbationModel.load_from_checkpoint(checkpoint_path)
+    model = StateTransitionPerturbationModel.load_from_checkpoint(checkpoint_path).to(torch.bfloat16)
     model.eval()
     device = next(model.parameters()).device
     cell_set_len = args.max_set_len if args.max_set_len is not None else getattr(model, "cell_sentence_len", 256)
@@ -585,7 +585,7 @@ def run_tx_infer(args: argparse.Namespace):
                     ctrl_basal = X_in[sampled_ctrl_idx, :]  # [win, E_in]
 
                     # 2) Build homogeneous pert one-hots
-                    pert_oh = vec.float().unsqueeze(0).repeat(win_size, 1)  # [win, pert_dim]
+                    pert_oh = vec.to(torch.bfloat16).unsqueeze(0).repeat(win_size, 1)  # [win, pert_dim]
 
                     # 3) Batch indices (optional)
                     if uses_batch_encoder and batch_indices_all is not None:
@@ -613,7 +613,7 @@ def run_tx_infer(args: argparse.Namespace):
                             batch_out["pert_cell_counts_preds"].detach().cpu().numpy().astype(np.float32)
                         )  # [win, G]
                     else:
-                        preds = batch_out["preds"].detach().cpu().numpy().astype(np.float32)  # [win, D]
+                        preds = batch_out["preds"].detach().cpu().to(torch.float32).numpy().astype(np.float32)  # [win, D]
 
                     # 6) Write predictions for these rows (controls included)
                     if writes_to[0] == ".X":
