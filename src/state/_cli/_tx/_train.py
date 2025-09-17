@@ -25,6 +25,7 @@ def run_tx_train(cfg: DictConfig):
     from cell_load.utils.modules import get_datamodule
     from lightning.pytorch.loggers import WandbLogger
     from lightning.pytorch.plugins.precision import MixedPrecision
+    from lightning.pytorch.profilers import PyTorchProfiler
 
     from ...tx.callbacks import (
         BatchSpeedMonitorCallback,
@@ -273,6 +274,16 @@ def run_tx_train(cfg: DictConfig):
         trainer_kwargs["max_epochs"] = 1  # do exactly one epoch
         # delete max_steps to avoid conflicts
         del trainer_kwargs["max_steps"]
+
+    if cfg["training"].get("profile"):
+        trainer_kwargs["profiler"] = PyTorchProfiler(
+            dirpath=run_output_dir,
+            filename="profiler_output",
+            export_to_chrome=True,  # creates trace.json for speedscope
+            with_stack=True,
+            profile_memory=False,
+            schedule=torch.profiler.schedule(wait=5, warmup=2, active=1, repeat=1),
+        )
 
     # Build trainer
     print(f"Building trainer with kwargs: {trainer_kwargs}")
