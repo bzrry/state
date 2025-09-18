@@ -258,6 +258,7 @@ def run_tx_train(cfg: DictConfig):
         callbacks=callbacks,
         gradient_clip_val=cfg["training"]["gradient_clip_val"] if cfg["model"]["name"].lower() != "cpa" else None,
         precision="bf16-mixed",
+        num_sanity_val_steps=0,
     )
 
     # Align logging cadence with rolling MFU window (and W&B logging)
