@@ -8,6 +8,8 @@ import torch.nn as nn
 
 from geomloss import SamplesLoss
 from typing import Tuple
+import polars
+from cell_eval import MetricsEvaluator
 
 from .base import PerturbationModel
 from .decoders import FinetuneVCICountsDecoder
@@ -155,6 +157,7 @@ class StateTransitionPerturbationModel(PerturbationModel):
         self.decoder_loss_weight = kwargs.get("decoder_weight", 1.0)
         self.regularization = kwargs.get("regularization", 0.0)
         self.detach_decoder = kwargs.get("detach_decoder", False)
+        self.compute_metrics_every_n_epochs = kwargs.get("compute_metrics_every_n_epochs", 5)
 
         self.transformer_backbone_key = transformer_backbone_key
         self.transformer_backbone_kwargs = transformer_backbone_kwargs
@@ -531,6 +534,28 @@ class StateTransitionPerturbationModel(PerturbationModel):
 
         return total_loss
 
+    def _compute_metrics(self, pred, target, perts):
+        adata_pred = ad.AnnData(
+            X=pred.to(torch.float32).cpu().numpy(),
+            obs={'target_gene': perts},
+        )
+        adata_real = ad.AnnData(
+            X=target.cpu().numpy(),
+            obs={'target_gene': perts},
+        )
+        evaluator = MetricsEvaluator(
+            adata_pred=adata_pred,
+            adata_real=adata_real,
+            pert_col='target_gene',
+        )
+        (results, agg_results) = evaluator.compute(profile='vcc')  # much faster with fewer cores
+        means = agg_results.filter(polars.col("statistic") == "mean")
+        return {
+            "de_score": means['overlap_at_N'][0],
+            "pert_score": means['discrimination_score_l1'][0],
+            "mae_score": means['mae'][0],
+        }
+
     def validation_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> None:
         """Validation step logic."""
         if self.confidence_token is None:
@@ -538,12 +563,14 @@ class StateTransitionPerturbationModel(PerturbationModel):
         else:
             pred, confidence_pred = self.forward(batch)
 
-        pred = pred.reshape(-1, self.cell_sentence_len, self.output_dim)
         target = batch["pert_cell_emb"]
+        compute_metrics = self.current_epoch % self.compute_metrics_every_n_epochs == 0
+        metrics = self._compute_metrics(pred, target, batch["pert_name"]) if compute_metrics else {}
+        pred = pred.reshape(-1, self.cell_sentence_len, self.output_dim)
         target = target.reshape(-1, self.cell_sentence_len, self.output_dim)
 
         loss = self.loss_fn(pred, target).mean()
-        self.log("val_loss", loss)
+        self.log_dict({"val_loss": loss} | metrics)
 
         # Log individual loss components if using combined loss
         if hasattr(self.loss_fn, "sinkhorn_loss") and hasattr(self.loss_fn, "energy_loss"):
