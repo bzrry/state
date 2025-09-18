@@ -571,6 +571,7 @@ class StateTransitionPerturbationModel(PerturbationModel):
             pred, confidence_pred = self.forward(batch)
 
         target = batch["pert_cell_emb"]
+        logger.info(f"target shape: {target.shape}")
         compute_metrics = self.current_epoch % self.compute_metrics_every_n_epochs == 0
         metrics = self._compute_metrics(pred, target, batch["pert_name"]) if compute_metrics else {}
         pred = pred.reshape(-1, self.cell_sentence_len, self.output_dim)
