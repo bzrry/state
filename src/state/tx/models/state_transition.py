@@ -3,6 +3,7 @@ from typing import Dict, Optional
 
 import anndata as ad
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 
@@ -548,12 +549,18 @@ class StateTransitionPerturbationModel(PerturbationModel):
             adata_real=adata_real,
             pert_col='target_gene',
         )
+        pred_de = pd.read_csv('pred_de.csv')
+        real_de = pd.read_csv('real_de.csv')
+        num_low_p_value_preds = (pred_de['p_value'] < 0.05).sum()
+        num_low_p_value_reals = (real_de['p_value'] < 0.05).sum()
         (results, agg_results) = evaluator.compute(profile='vcc')  # much faster with fewer cores
         means = agg_results.filter(polars.col("statistic") == "mean")
         return {
             "de_score": means['overlap_at_N'][0],
             "pert_score": means['discrimination_score_l1'][0],
             "mae_score": means['mae'][0],
+            "num_low_p_value_preds": num_low_p_value_preds,
+            "num_low_p_value_reals": num_low_p_value_reals,
         }
 
     def validation_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> None:
